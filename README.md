@@ -14,13 +14,7 @@ The project is split into three repositories:
 
 ## Architecture
 
-```
-Internet → Route53 (DNS) → ALB (HTTPS, public subnets) → ECS Fargate (private subnets)
-                                                                  ↓
-                                                             NAT Gateway → ECR (image pull)
-                                                                  ↓
-                                                          CloudWatch Logs/Metrics → SNS Alerts
-```
+![AWS Architecture](StreaverChallengeArchitecture.png)
 
 - **Networking**: VPC with 2 AZs, public subnets (ALB), private subnets (ECS tasks), NAT Gateway per AZ
 - **Compute**: ECS Fargate running the containerized app with health checks and circuit breaker rollback
@@ -180,12 +174,9 @@ terraform destroy
 
 ## What I Would Improve With More Time
 
-- **OIDC authentication**: Replace long-lived IAM access keys with GitHub OIDC federation for CI/CD
 - **WAF**: Attach AWS WAF to the ALB for rate limiting and common exploit protection
 - **Structured logging**: JSON-formatted logs with request IDs for correlation
-- **Custom CloudWatch dashboard**: Single pane of glass for all metrics
-- **Cost optimization**: Single NAT Gateway for non-production (currently one per AZ for resilience)
 - **Container vulnerability scanning**: Integrate Trivy or Snyk into the CI pipeline
-- **Load testing**: k6 or Locust script to validate scaling behavior
+- **Load testing**: k6, Locust, JMeter script to validate scaling behavior
 - **Separate environments**: Use Terraform workspaces or variable files for staging/production separation
 - **ECS deployment via CI**: Auto-update the ECS task definition with the new image tag after push

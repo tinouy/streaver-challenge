@@ -16,15 +16,15 @@ A single `terraform apply` would race between these resources. Splitting into tw
 
 ## Application
 
-- **Python + FastAPI**: Chosen for simplicity and fast development. The challenge focuses on infrastructure, not application complexity. FastAPI provides automatic OpenAPI compatibility and async support out of the box.
+- **Python + FastAPI**: Chosen for simplicity and fast development. The challenge focuses on infrastructure, not application complexity.
 - **Multi-stage Docker build**: Keeps the final image small by separating dependency installation from the runtime image.
 - **Non-root user**: The container runs as a dedicated `app` user, not root, reducing the blast radius of a container escape.
 - **Platform pinned to `linux/amd64`**: ECS Fargate runs on amd64. Without explicit pinning, building on Apple Silicon (arm64) produces an incompatible image.
 
 ## Networking
 
-- **Fargate over EC2**: Eliminates instance management overhead. Trade-off: slightly higher cost per vCPU-hour, but justified for a minimal service with no special OS requirements.
-- **2 AZs**: Provides high availability while keeping costs manageable. A 3-AZ setup would be more resilient but adds a third NAT Gateway (~$32/month).
+- **Fargate over EC2**: The challenge explicitly requires an ECS service. Within ECS, Fargate was chosen over EC2 launch type to eliminate instance management overhead (no patching, no AMIs, no capacity planning). Trade-off: slightly higher cost per vCPU-hour, but justified for a minimal service with no special OS requirements.
+- **2 AZs**: Provides high availability while keeping costs manageable.
 - **NAT Gateway per AZ**: Each private subnet has its own NAT Gateway for AZ-independent fault tolerance. A single shared NAT Gateway would save ~$32/month but creates a single point of failure.
 - **No public IPs on ECS tasks**: Tasks run in private subnets and are only reachable via the ALB. Outbound traffic goes through NAT Gateways.
 
